@@ -1,0 +1,10 @@
+{
+  "regions": ["sin1"],
+  "functions": {
+    "api/analyze.js": { "maxDuration": 15 },
+    "api/analyze-dex.js": { "maxDuration": 15 },
+    "api/binance-futures.js": { "maxDuration": 10 },
+    "api/scan.js": { "maxDuration": 10 },
+    "api/solana.js": { "maxDuration": 10 }
+  }
+}

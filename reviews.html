@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review Pengguna — PONSI BOT</title>
+<style>
+  :root{
+    --bg:#07090a;
+    --panel:#0d1210;
+    --panel-2:#0f1613;
+    --border:#1c2521;
+    --border-soft:#161d1a;
+    --text:#d7e4dd;
+    --text-dim:#7c8f87;
+    --text-faint:#4d5a55;
+    --green:#28e08a;
+    --green-dim:#1b7a52;
+    --red:#ff5470;
+    --amber:#e0b028;
+    --mono: "JetBrains Mono","SF Mono",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--green-dim); color:#fff; }
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--border); border-radius:4px; }
+
+  .wrap{ max-width:960px; margin:0 auto; padding:20px 18px 60px; }
+
+  /* header, sama identitas dengan dashboard */
+  .topbar{ display:flex; align-items:center; gap:12px; padding:6px 0 20px; }
+  .brand-mark{
+    width:36px; height:36px; border-radius:10px;
+    background:radial-gradient(circle at 30% 30%, var(--green), #0a3d26 75%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-weight:700; color:#04140b; font-size:14px;
+    box-shadow:0 0 24px -6px rgba(40,224,138,0.55);
+  }
+  .brand-text h1{ font-size:14px; letter-spacing:0.04em; font-weight:700; }
+  .brand-text p{ font-size:10px; color:var(--text-faint); letter-spacing:0.08em; margin-top:2px; }
+
+  h2.page-title{ font-size:20px; font-weight:700; margin-bottom:4px; }
+  .page-sub{ color:var(--text-dim); font-size:13px; margin-bottom:22px; }
+
+  /* ringkasan rating */
+  .summary{
+    display:grid; grid-template-columns:180px 1fr; gap:24px;
+    background:var(--panel); border:1px solid var(--border-soft); border-radius:12px;
+    padding:20px; margin-bottom:22px;
+  }
+  .summary-score{ text-align:center; border-right:1px solid var(--border-soft); padding-right:20px; }
+  .summary-score .num{ font-family:var(--mono); font-size:40px; font-weight:700; color:var(--text); line-height:1; }
+  .stars{ color:var(--amber); font-size:15px; letter-spacing:2px; margin:8px 0 4px; }
+  .summary-score .count{ font-size:11px; color:var(--text-faint); font-family:var(--mono); }
+
+  .dist-row{ display:flex; align-items:center; gap:10px; margin-bottom:6px; font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+  .dist-row .label{ width:34px; }
+  .dist-track{ flex:1; height:6px; border-radius:3px; background:var(--border); overflow:hidden; }
+  .dist-fill{ height:100%; background:linear-gradient(90deg, var(--green-dim), var(--green)); }
+  .dist-row .pct{ width:34px; text-align:right; }
+
+  /* filter chip */
+  .filters{ display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+  .chip{
+    font-family:var(--mono); font-size:11px; color:var(--text-dim);
+    padding:6px 12px; border-radius:999px; border:1px solid var(--border);
+    cursor:pointer; user-select:none; background:var(--panel);
+  }
+  .chip:hover{ color:var(--text); }
+  .chip.active{ color:var(--green); border-color:var(--green-dim); background:var(--panel-2); }
+
+  /* review card */
+  .review{
+    background:var(--panel); border:1px solid var(--border-soft); border-radius:12px;
+    padding:16px 18px; margin-bottom:12px;
+  }
+  .review-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .who{ display:flex; align-items:center; gap:10px; }
+  .avatar{
+    width:34px; height:34px; border-radius:9px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:#04140b;
+  }
+  .who-name{ font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .verified{
+    font-family:var(--mono); font-size:9px; color:var(--green); border:1px solid var(--green-dim);
+    padding:1px 6px; border-radius:999px;
+  }
+  .who-meta{ font-size:11px; color:var(--text-faint); margin-top:2px; font-family:var(--mono); }
+  .review-stars{ color:var(--amber); font-size:12px; letter-spacing:1px; white-space:nowrap; }
+
+  .review-body{ font-size:13px; line-height:1.55; color:var(--text); margin:12px 0 10px; }
+  .review-tags{ display:flex; gap:6px; flex-wrap:wrap; }
+  .tag{
+    font-family:var(--mono); font-size:10px; color:var(--text-dim);
+    background:var(--panel-2); border:1px solid var(--border-soft);
+    padding:3px 8px; border-radius:6px;
+  }
+  .tag.pos{ color:var(--green); border-color:var(--green-dim); }
+
+  .review-foot{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:12px; padding-top:10px; border-top:1px solid var(--border-soft);
+    font-family:var(--mono); font-size:11px; color:var(--text-faint);
+  }
+  .helpful{ display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .helpful:hover{ color:var(--text-dim); }
+  .helpful.on{ color:var(--green); }
+
+  .disclaimer{
+    margin-top:24px; padding:14px 16px; border:1px dashed var(--border);
+    border-radius:10px; font-size:11.5px; color:var(--text-faint); line-height:1.6;
+  }
+
+  @media (max-width:600px){
+    .summary{ grid-template-columns:1fr; }
+    .summary-score{ border-right:none; border-bottom:1px solid var(--border-soft); padding-right:0; padding-bottom:16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand-mark">P</div>
+    <div class="brand-text">
+      <h1>PONSI BOT</h1>
+      <p>ROBINHOOD CHAIN SCANNER</p>
+    </div>
+  </div>
+
+  <h2 class="page-title">Review Pengguna</h2>
+  <p class="page-sub">Pengalaman nyata dari user yang pakai PONSI BOT buat mantau token baru di Robinhood Chain.</p>
+
+  <div class="summary">
+    <div class="summary-score">
+      <div class="num">4.7</div>
+      <div class="stars">★★★★★</div>
+      <div class="count">berdasarkan 214 review</div>
+    </div>
+    <div class="summary-dist">
+      <div class="dist-row"><span class="label">5 ★</span><div class="dist-track"><div class="dist-fill" style="width:78%"></div></div><span class="pct">78%</span></div>
+      <div class="dist-row"><span class="label">4 ★</span><div class="dist-track"><div class="dist-fill" style="width:13%"></div></div><span class="pct">13%</span></div>
+      <div class="dist-row"><span class="label">3 ★</span><div class="dist-track"><div class="dist-fill" style="width:5%"></div></div><span class="pct">5%</span></div>
+      <div class="dist-row"><span class="label">2 ★</span><div class="dist-track"><div class="dist-fill" style="width:2%"></div></div><span class="pct">2%</span></div>
+      <div class="dist-row"><span class="label">1 ★</span><div class="dist-track"><div class="dist-fill" style="width:2%"></div></div><span class="pct">2%</span></div>
+    </div>
+  </div>
+
+  <div class="filters" id="filters">
+    <div class="chip active" data-f="all">Semua</div>
+    <div class="chip" data-f="5">5 bintang</div>
+    <div class="chip" data-f="4">4 bintang</div>
+    <div class="chip" data-f="3">3 bintang ke bawah</div>
+    <div class="chip" data-f="verified">Verified saja</div>
+  </div>
+
+  <div id="reviewList"></div>
+
+  <div class="disclaimer">
+    Review ditulis oleh pengguna dan mencerminkan pengalaman pribadi masing-masing — hasil trading tiap orang berbeda-beda dan tidak dijamin. PONSI BOT hanya alat bantu penyaringan token; keputusan beli/jual tetap tanggung jawab pengguna. Bukan nasihat keuangan.
+  </div>
+</div>
+
+<script>
+(function(){
+  const COLORS = ["#28e08a","#3ba0ff","#e0b028","#c34bff","#ff7a45","#4be0d8","#ff5470","#8be028"];
+
+  const reviews = [
+    {
+      name:"Bayu S.", initials:"BS", rating:5, verified:true, days:"2 hari lalu",
+      text:"Fitur filter LP checked sama distribusi wallet-nya kepake banget. Sebelumnya scroll manual di DexScreener capek, sekarang tinggal buka tab Trending udah kesaring duluan.",
+      tags:[{t:"Mudah dipakai",pos:true},{t:"Filter LP",pos:true}], helpful:34
+    },
+    {
+      name:"Dinda R.", initials:"DR", rating:5, verified:true, days:"4 hari lalu",
+      text:"Signal bar 4-tingkat itu bikin gampang milih mana yang layak dicek lebih lanjut. Tetep saya double-check manual sebelum entry, tapi buat nyaring dari ratusan token jadi jauh lebih cepat.",
+      tags:[{t:"Hemat waktu",pos:true},{t:"Signal jelas",pos:true}], helpful:27
+    },
+    {
+      name:"Fajar A.", initials:"FA", rating:4, verified:true, days:"1 minggu lalu",
+      text:"Overall bagus, cuma kadang update harga agak delay beberapa detik pas market lagi rame banget. Semoga bisa dipercepat refresh-nya.",
+      tags:[{t:"Kadang delay",pos:false}], helpful:19
+    },
+    {
+      name:"Wulan K.", initials:"WK", rating:5, verified:false, days:"1 minggu lalu",
+      text:"Suka tampilannya, gelap dan enak dibaca lama-lama. Watchlist-nya juga kepake buat pantau token yang belum siap entry tapi worth dipantau.",
+      tags:[{t:"UI enak dilihat",pos:true}], helpful:15
+    },
+    {
+      name:"Reza P.", initials:"RP", rating:3, verified:true, days:"2 minggu lalu",
+      text:"Kriteria rug pull check-nya cukup ketat, jadi kadang token yang sebenernya masih layak dilihat malah kefilter duluan. Mungkin perlu opsi buat atur sensitivitas filter-nya sendiri.",
+      tags:[{t:"Filter terlalu ketat",pos:false}], helpful:22
+    },
+    {
+      name:"Citra M.", initials:"CM", rating:5, verified:true, days:"2 minggu lalu",
+      text:"Paling suka bagian buy/sell ratio langsung kelihatan di tabel, jadi nggak perlu buka satu-satu chart buat cek tekanan beli.",
+      tags:[{t:"Data lengkap",pos:true}], helpful:12
+    },
+    {
+      name:"Andre T.", initials:"AT", rating:5, verified:false, days:"3 minggu lalu",
+      text:"Udah coba 2 minggu buat mantau token baru di Robinhood Chain, cukup membantu buat riset awal sebelum masuk ke DexScreener buat cek detail lebih dalam.",
+      tags:[{t:"Bagus buat riset awal",pos:true}], helpful:9
+    },
+  ];
+
+  function render(filter){
+    let list = reviews;
+    if(filter==="verified") list = reviews.filter(r=>r.verified);
+    else if(filter!=="all") list = reviews.filter(r=>filter==="3" ? r.rating<=3 : r.rating===Number(filter));
+
+    document.getElementById("reviewList").innerHTML = list.map((r,i)=>{
+      const color = COLORS[i % COLORS.length];
+      return `
+      <div class="review">
+        <div class="review-head">
+          <div class="who">
+            <div class="avatar" style="background:${color}">${r.initials}</div>
+            <div>
+              <div class="who-name">${r.name} ${r.verified?'<span class="verified">Verified</span>':''}</div>
+              <div class="who-meta">${r.days}</div>
+            </div>
+          </div>
+          <div class="review-stars">${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}</div>
+        </div>
+        <div class="review-body">${r.text}</div>
+        <div class="review-tags">
+          ${r.tags.map(t=>`<span class="tag ${t.pos?'pos':''}">${t.t}</span>`).join("")}
+        </div>
+        <div class="review-foot">
+          <span class="helpful" data-helpful="${i}">👍 Membantu (${r.helpful})</span>
+          <span>#${1000+i}</span>
+        </div>
+      </div>`;
+    }).join("");
+
+    document.querySelectorAll("[data-helpful]").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        el.classList.toggle("on");
+        const n = el.textContent.match(/\((\d+)\)/)[1];
+        const base = el.getAttribute("data-helpful");
+        const delta = el.classList.contains("on") ? 1 : -1;
+        el.textContent = `👍 Membantu (${Number(n)+delta})`;
+      });
+    });
+  }
+
+  document.getElementById("filters").addEventListener("click",(e)=>{
+    const chip = e.target.closest(".chip");
+    if(!chip) return;
+    document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    render(chip.getAttribute("data-f"));
+  });
+
+  render("all");
+})();
+</script>
+</body>
+</html>
